@@ -10,7 +10,7 @@ CREATE TABLE dwh.dim_calendar (
     day_name varchar(15) NOT NULL,
     day_of_week int NOT NULL,
     day_of_month int NOT NULL,
-    day_of_qurter int NOT NULL,
+    day_of_quarter int NOT NULL,
     day_of_year int NOT NULL,
     week_of_month int NOT NULL,
     week_of_year int NOT NULL,
