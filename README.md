@@ -17,15 +17,15 @@
 docker run -d -p 5432:5432 -e POSTGRES_PASSWORD=postgres --name postgres-new postgres:12
 psql -f DDL.sql -h localhost -p 5432 -U postgres -W postgres
 ```
-#####ERD
+##### ERD
 ![ERD](https://github.com/amleshkov/dwh/blob/main/ERD.png?raw=true)
-#####ETL
+##### ETL
 ![ETL](https://github.com/amleshkov/dwh/blob/main/ETL.png?raw=true)
 
 
 ### Описание таблиц в БД
 Все таблицы измерений, кроме dim_calendar имеют специальные атрибуты `start_ts`, `end_ts`, `is_current`, `version` и к ним применяется версионирование SCD второго типа.
-#####dim_calendar
+##### dim_calendar
 Сгенерированная таблица календаря
 | атрибут | описание |
 | ---------|----------|
@@ -57,7 +57,7 @@ psql -f DDL.sql -h localhost -p 5432 -U postgres -W postgres
 |mmddyyyy|Дата в формате `mmddyyyy`|
 |weekend|Признак выходного дня (суббота и воскресенье)|
 
-#####dim_passengers
+##### dim_passengers
 Таблица-измерение по пассажирам
 |атрибут|описание|
 |-------|--------|
@@ -72,7 +72,7 @@ psql -f DDL.sql -h localhost -p 5432 -U postgres -W postgres
 |is_current|Признак действительности записи|
 |version|Версия записи|
 
-#####dim_aircrafts
+##### dim_aircrafts
 Таблица-измерение по самолетам
 |атрибут|описание|
 |-------|--------|
@@ -85,7 +85,7 @@ psql -f DDL.sql -h localhost -p 5432 -U postgres -W postgres
 |is_current|Признак действительности записи|
 |version|Версия записи|
 
-#####dim_airports
+##### dim_airports
 Таблица-измерение по аэропортам
 |атрибут|описание|
 |-------|--------|
@@ -101,7 +101,7 @@ psql -f DDL.sql -h localhost -p 5432 -U postgres -W postgres
 |is_current|Признак действительности записи|
 |version|Версия записи|
 
-#####dim_tarrif
+##### dim_tarrif
 Таблица-измерение по типам тарифов
 |атрибут|описание|
 |-------|--------|
@@ -112,7 +112,7 @@ psql -f DDL.sql -h localhost -p 5432 -U postgres -W postgres
 |is_current|Признак действительности записи|
 |version|Версия записи|
 
-#####fact_flights
+##### fact_flights
 Таблица фактов по перелетам
 |атрибут|описание|
 |-------|--------|
@@ -130,21 +130,21 @@ psql -f DDL.sql -h localhost -p 5432 -U postgres -W postgres
 |tariff|Внешний ключ dim_tariff(id)|
 |amout|Стоимость|
 
-#####validations
+##### validations
 Справочник типов валидации данных
 |атрибут|описание|
 |-------|--------|
 |id|Уникальный идентификатор записи|
 |validation|Наименование проверки корректности данных|
 
-#####inventory
+##### inventory
 Справочник таблиц схемы bookings
 |атрибут|описание|
 |-------|--------|
 |id|Уникальный идентификатор записи|
 |table|Наименование исходной таблицы в схеме bookings, откуда получена некорректная запись|
 
-#####log_rejects
+##### log_rejects
 Таблица, содержащая данные, не прошешдшие валидацию
 |атрибут|описание|
 |-------|--------|
@@ -199,7 +199,7 @@ LEFT JOIN bookings.aircrafts AS a2 ON f.aircraft_code = a2.aircraft_code
 WHERE f.status = 'Arrived'
 ```
 Полученные данные проходят валидацию. Строки, не прошедшие валидацию помещаются в таблицу `dwh.log_rejects` в виде json, с обогащением информацией по идентификатору бронирования, идентификатору исходной таблицы схемы bookings и идентификатору типа проверки.
-#####Описание проверок
+##### Описание проверок
 |Проверка|Описание|
 |-------|--------|
 |passenger_id| Проверка на соответствие регулярному выражению `^\d{4}\s\d{6}$`|
@@ -216,4 +216,5 @@ WHERE f.status = 'Arrived'
 |range|Проверка дальности самолета на `is numeric`|
 |tariff|Проверка класса обслуживания на `NOT NULL`|
 |amount| Проверка стоимости на `is numeric` и `>1000`|
+
 После успешного проходения проверок данные с помощью последовательных шагов Dimension Lookup/Update загружаются в таблицу `fact_flights` с одновременным заполнением таблиц измерений `dim_*`.
